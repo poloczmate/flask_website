@@ -1,6 +1,6 @@
 #!/bin/python
 import re
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, flash
 import base64
 import hashlib
 import secrets
@@ -31,8 +31,6 @@ def hash_password(password, salt=None): #function to hash the passwords
 
 def verify_password(password, password_hash, salt):
     compare_salt, compare_hash = hash_password(password,salt).split('$', 1)    #hash the password with the function above
-    print(compare_hash)
-    print(password_hash)
     return secrets.compare_digest(password_hash, compare_hash)  #true or false?
 
 
@@ -44,16 +42,21 @@ def index():
 
 @app.route("/registration", methods=['GET', 'POST'])
 def registration():
-    return True
+    if request.method == "POST":
+        if request.form["username"] != "" and request.form["password"] != "":
+            salt, password = hash_password(request.form["password"]).split('$',1)
+            tmp = (request.form["username"], salt, password)
+            cursor.execute(register_sql,tmp)
+        else:
+            print("error")
+    return render_template("registration.html")
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    #work to do
     if request.method == "POST":
         tmp = (request.form["username"],)
         cursor.execute(verify_sql,tmp)
         results = cursor.fetchall()
-        print(results[0])
         if verify_password(request.form["password"], results[0][0], results[0][1]):
             return redirect("home")
         else:
