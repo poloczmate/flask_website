@@ -47,6 +47,7 @@ def registration():
             salt, password = hash_password(request.form["password"]).split('$',1)
             tmp = (request.form["username"], salt, password)
             cursor.execute(register_sql,tmp)
+            mydb.commit()
         else:
             print("error")
     return render_template("registration.html")
