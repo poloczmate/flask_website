@@ -55,13 +55,17 @@ def registration():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == "POST":
-        tmp = (request.form["username"],)
-        cursor.execute(verify_sql,tmp)
-        results = cursor.fetchall()
-        if verify_password(request.form["password"], results[0][0], results[0][1]):
-            return redirect("home")
-        else:
+        try:
+            tmp = (request.form["username"],)
+            cursor.execute(verify_sql,tmp)
+            results = cursor.fetchall()
+            if verify_password(request.form["password"], results[0][0], results[0][1]):
+                return redirect("home")
+            else:
+                print("Invalid credentials. Please try again.")
+        except:
             print("Invalid credentials. Please try again.")
+            return render_template("login.html")
     return render_template("login.html")
 
 app.run(host="0.0.0.0", port = 5001)
